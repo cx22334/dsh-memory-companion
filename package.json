@@ -1,0 +1,20 @@
+{
+  "name": "dsh-memory-companion",
+  "version": "1.0.0-dev.1",
+  "description": "File-first character diaries, provenance and replaceable TagMemo retrieval for DSH",
+  "type": "module",
+  "private": true,
+  "license": "CC-BY-NC-SA-4.0",
+  "engines": { "node": ">=24.9.0" },
+  "main": "./src/plugin.mjs",
+  "exports": {
+    ".": "./src/plugin.mjs",
+    "./bootstrap": "./src/bootstrap.mjs",
+    "./service": "./src/service.mjs"
+  },
+  "bin": { "dsh-memory": "./src/cli.mjs" },
+  "dsh": { "bundle": { "patch": "./cordis.patch.yml" } },
+  "files": ["src", "ui", "vendor", "docs", "schemas", "cordis.patch.yml", "memory.config.example.json", "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md"],
+  "dependencies": { "yaml": "2.8.1" },
+  "optionalDependencies": { "triviumdb": "0.9.0" }
+}

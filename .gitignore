@@ -1,0 +1,21 @@
+# Local credentials and operator configuration
+.env
+.env.*
+!.env.example
+memory.config.json
+*.local.json
+
+# Installed dependencies, editor files and generated output
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+coverage/
+dist/
+*.zip
+
+# Never commit a live memory vault or management credentials
+DSH-Memory/
+memory-exports/
+.runtime/

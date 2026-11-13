@@ -1,0 +1,685 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:dsh-memory-companion:vault-v1",
+  "title": "DSH Memory Companion vault v1 generated structures",
+  "description": "Structure only. Runtime additionally checks exact bytes, source ownership, control chain, permissions, revisions and exclusion state. Not executed or validated in this implementation session.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/VaultManifest"
+    },
+    {
+      "$ref": "#/$defs/Event"
+    },
+    {
+      "$ref": "#/$defs/BranchRef"
+    },
+    {
+      "$ref": "#/$defs/NoteMetadata"
+    },
+    {
+      "$ref": "#/$defs/ControlRecord"
+    },
+    {
+      "$ref": "#/$defs/Proposal"
+    },
+    {
+      "$ref": "#/$defs/Relation"
+    }
+  ],
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "Digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "Revision": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "MaybeTime": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "Target": {
+      "type": "object",
+      "required": [
+        "note_id",
+        "revision_id"
+      ],
+      "properties": {
+        "note_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "revision_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Revision"
+            },
+            {
+              "const": "*"
+            }
+          ]
+        },
+        "body_spans": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Span"
+          }
+        }
+      }
+    },
+    "Span": {
+      "type": "object",
+      "required": [
+        "start_utf8_byte",
+        "end_utf8_byte"
+      ],
+      "properties": {
+        "start_utf8_byte": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end_utf8_byte": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "Source": {
+      "type": "object",
+      "required": [
+        "event_id",
+        "text_sha256",
+        "start_utf8_byte",
+        "end_utf8_byte"
+      ],
+      "properties": {
+        "event_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "text_sha256": {
+          "$ref": "#/$defs/Digest"
+        },
+        "start_utf8_byte": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end_utf8_byte": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "quote": {
+          "type": "string"
+        },
+        "context_before": {
+          "type": "string"
+        },
+        "context_after": {
+          "type": "string"
+        },
+        "quote_check": {
+          "const": "quote_found"
+        },
+        "source_kind": {
+          "type": "string"
+        }
+      }
+    },
+    "Dependency": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "note_id",
+            "revision_id"
+          ],
+          "properties": {
+            "note_id": {
+              "$ref": "#/$defs/Identifier"
+            },
+            "revision_id": {
+              "$ref": "#/$defs/Revision"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "snapshot_id"
+          ],
+          "properties": {
+            "snapshot_id": {
+              "$ref": "#/$defs/Identifier"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "VaultManifest": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "vault_id",
+        "created_at",
+        "roles"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "vault_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "directory"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/Identifier"
+              },
+              "name": {
+                "type": "string"
+              },
+              "directory": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "Event": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "record_type",
+        "event_id",
+        "source",
+        "branch_id",
+        "context_id",
+        "context_role_id",
+        "speaker",
+        "origin",
+        "evidence_eligible",
+        "captured_at",
+        "text",
+        "text_sha256",
+        "raw_seq"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "record_type": {
+          "enum": [
+            "message",
+            "context_snapshot"
+          ]
+        },
+        "event_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "source": {
+          "type": "object"
+        },
+        "capture_key": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "branch_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "context_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "context_role_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "speaker": {
+          "type": "string"
+        },
+        "origin": {
+          "type": "string"
+        },
+        "evidence_eligible": {
+          "type": "boolean"
+        },
+        "source_time": {
+          "$ref": "#/$defs/MaybeTime"
+        },
+        "source_time_basis": {
+          "type": "string"
+        },
+        "captured_at": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "text_sha256": {
+          "$ref": "#/$defs/Digest"
+        },
+        "snapshot_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "revises_event_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "revision_identity_uncertain": {
+          "type": "boolean"
+        },
+        "raw_seq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "derived_from": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Dependency"
+          }
+        }
+      }
+    },
+    "BranchRef": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "record_type",
+        "context_id",
+        "branch_id",
+        "parent_branch_id",
+        "fork_after_event_id",
+        "event_id",
+        "source",
+        "capture_key",
+        "raw_seq"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "record_type": {
+          "const": "branch_ref"
+        },
+        "context_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "branch_id": {
+          "type": "string"
+        },
+        "parent_branch_id": {
+          "type": "string"
+        },
+        "fork_after_event_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "event_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "source": {
+          "type": "object"
+        },
+        "capture_key": {
+          "type": "string"
+        },
+        "captured_at": {
+          "type": "string"
+        },
+        "raw_seq": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "NoteMetadata": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "note_id",
+        "kind",
+        "context_id",
+        "owner_role_id",
+        "author_role_id",
+        "created_at",
+        "origin",
+        "stance",
+        "tags",
+        "facets",
+        "sources",
+        "derived_from",
+        "creation_operation_id"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "note_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "kind": {
+          "enum": [
+            "diary",
+            "public",
+            "impression"
+          ]
+        },
+        "context_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "owner_role_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "author_role_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "source_time": {
+          "$ref": "#/$defs/MaybeTime"
+        },
+        "about_time": {
+          "$ref": "#/$defs/MaybeTime"
+        },
+        "about_time_basis": {
+          "type": "object",
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "unknown",
+                "explicit_source_date",
+                "user_confirmed"
+              ]
+            }
+          }
+        },
+        "origin": {
+          "enum": [
+            "self",
+            "backfill",
+            "user"
+          ]
+        },
+        "stance": {
+          "enum": [
+            "observation",
+            "interpretation",
+            "feeling"
+          ]
+        },
+        "tags": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "string"
+          }
+        },
+        "facets": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "string"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "$ref": "#/$defs/Source"
+          }
+        },
+        "derived_from": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Dependency"
+          }
+        },
+        "creation_operation_id": {
+          "$ref": "#/$defs/Identifier"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ControlRecord": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "vault_id",
+        "action_id",
+        "log_seq",
+        "previous_hash",
+        "type",
+        "actor",
+        "context_id",
+        "created_at",
+        "data",
+        "record_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "vault_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "action_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "log_seq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "previous_hash": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Digest"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "record_hash": {
+          "$ref": "#/$defs/Digest"
+        },
+        "type": {
+          "enum": [
+            "binding",
+            "proposal_registered",
+            "operation_prepared",
+            "operation_stale",
+            "operation_commit",
+            "note_observed",
+            "note_missing",
+            "proposal_stale"
+          ]
+        },
+        "actor": {
+          "type": "string"
+        },
+        "context_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Proposal": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "proposal_id",
+        "kind",
+        "context_id",
+        "author_role_id",
+        "binding",
+        "initial_status",
+        "created_at",
+        "expected",
+        "new_notes",
+        "effects",
+        "proposal_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "proposal_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "context_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "author_role_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "binding": {
+          "type": "object"
+        },
+        "initial_status": {
+          "const": "proposed"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "expected": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Target"
+          }
+        },
+        "new_notes": {
+          "type": "array",
+          "maxItems": 128,
+          "items": {
+            "type": "object"
+          }
+        },
+        "effects": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "type": "object"
+          }
+        },
+        "reason": {
+          "type": "string"
+        },
+        "relation_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "proposal_hash": {
+          "$ref": "#/$defs/Digest"
+        }
+      }
+    },
+    "Relation": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "relation_id",
+        "context_id",
+        "type",
+        "from",
+        "to",
+        "scope",
+        "initial_status",
+        "proposed_by_role_id",
+        "created_at"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "relation_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "context_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "type": {
+          "enum": [
+            "claims_correction",
+            "claims_retraction",
+            "supplements",
+            "related"
+          ]
+        },
+        "from": {
+          "$ref": "#/$defs/Target"
+        },
+        "to": {
+          "$ref": "#/$defs/Target"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "initial_status": {
+          "const": "proposed"
+        },
+        "proposed_by_role_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "evidence_event_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          }
+        },
+        "created_at": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

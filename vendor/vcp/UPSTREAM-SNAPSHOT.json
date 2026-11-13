@@ -1,0 +1,452 @@
+{
+  "repository": "https://github.com/lioensky/VCPToolBox",
+  "commit": "73fd165d858d64d6c849533b3ec8e01c34f69e12",
+  "commit_date": "2026-11-13T06:08:23Z",
+  "files": [
+    {
+      "path": "TagMemoEngine.js",
+      "blob_sha": "8ed6e22a0ca8b7d1142c4c5b658f12c0f7a955a1",
+      "bytes": 23039
+    },
+    {
+      "path": "TagMemoV10Engine.js",
+      "blob_sha": "461d727998509b83618f2eb8a8e262b56787b067",
+      "bytes": 11964
+    },
+    {
+      "path": "EmbeddingUtils.js",
+      "blob_sha": "fa380b3355fe27b39ccd7f5ae9a3b41f71336e19",
+      "bytes": 17957
+    },
+    {
+      "path": "AGENTS.md",
+      "blob_sha": "28f22b4de495a63f14ede8fe72698278c877cb8d",
+      "bytes": 8544
+    },
+    {
+      "path": "KnowledgeBaseManager.js",
+      "blob_sha": "6c48ffa20f2a66b78b786260bb7b03fed55418c6",
+      "bytes": 167169
+    },
+    {
+      "path": "LICENSE",
+      "blob_sha": "88cc3000e0b231a842c953802fa54290d56eefd8",
+      "bytes": 14022
+    },
+    {
+      "path": "RiverMemoEngine.js",
+      "blob_sha": "6fc4324b7ed882428192bc996f32f62790e36061",
+      "bytes": 26716
+    },
+    {
+      "path": "ResultDeduplicator.js",
+      "blob_sha": "e1bfde48f876ddcce58ceaee3491e32c9790ea08",
+      "bytes": 22591
+    },
+    {
+      "path": "TDBKnowledge.js",
+      "blob_sha": "4a276b3e0b9c5f3f3c63288cf938bb510156e868",
+      "bytes": 65305
+    },
+    {
+      "path": "TextChunker.js",
+      "blob_sha": "e54dc6bcf9e458f726d10c44595731ed02056815",
+      "bytes": 19483
+    },
+    {
+      "path": "modules/AGENTS.md",
+      "blob_sha": "62b6d9d5846df4ec570f1b38b81c5112b18a87c0",
+      "bytes": 3731
+    },
+    {
+      "path": "modules/knowledgeBase/databaseCoordinator.js",
+      "blob_sha": "c33817a3231419df009e8f86f016e53f0948e252",
+      "bytes": 15391
+    },
+    {
+      "path": "modules/knowledgeBase/diaryMetadataCache.js",
+      "blob_sha": "003d40e2da052a49589ce9e2e4c84b8a25c5533d",
+      "bytes": 7891
+    },
+    {
+      "path": "modules/knowledgeBase/indexRepository.js",
+      "blob_sha": "ad84eb58449bd08d8a2326d774e77852c4b0e546",
+      "bytes": 22898
+    },
+    {
+      "path": "modules/knowledgeBase/fileWatcher.js",
+      "blob_sha": "c888df81b321d23bda5f4fd5d47e64a61f81a8af",
+      "bytes": 11580
+    },
+    {
+      "path": "modules/knowledgeBase/ingestionPipeline.js",
+      "blob_sha": "c8f627f87e9ce4cb63b29d17c65169d58e88f47c",
+      "bytes": 37087
+    },
+    {
+      "path": "docs/TagMemo_Wave_Algorithm_Deep_Dive.md",
+      "blob_sha": "ac9bb2a28ccf2aec8bb3e7356893581d8791f77c",
+      "bytes": 51658
+    },
+    {
+      "path": "modules/knowledgeBase/memoConfig.js",
+      "blob_sha": "66f129800358d0e26e54b1a19091f08c946cff09",
+      "bytes": 5611
+    },
+    {
+      "path": "modules/knowledgeBase/lightMemoAdmission.js",
+      "blob_sha": "c5768fbe5194d053ab47db78b0cd1b32357bc2e4",
+      "bytes": 2123
+    },
+    {
+      "path": "modules/knowledgeBase/memoryProfiler.js",
+      "blob_sha": "6047b4ea299354c8aa35e4cf897a76ebf07c99fd",
+      "bytes": 12812
+    },
+    {
+      "path": "modules/knowledgeBase/searchService.js",
+      "blob_sha": "2c9a2da10e959ac471dec432aaf325d7fb654b45",
+      "bytes": 9323
+    },
+    {
+      "path": "modules/knowledgeBase/tagConsistencyService.js",
+      "blob_sha": "43fbce430f817cdf85d75eb3071e17baf3ad8f75",
+      "bytes": 21556
+    },
+    {
+      "path": "docs/RIVERMEMO_TOPOLOGY_V3.md",
+      "blob_sha": "683140589a725a0ce86789ce4ccced3e00cab83b",
+      "bytes": 42319
+    },
+    {
+      "path": "package.json",
+      "blob_sha": "9d2473d7916d092c65f50a24521e5ab81eee248f",
+      "bytes": 2808
+    },
+    {
+      "path": "modules/knowledgeBase/textPreprocessor.js",
+      "blob_sha": "b67f57b489e0fe93ada39dfdc68bd9446b2fd785",
+      "bytes": 3285
+    },
+    {
+      "path": "modules/knowledgeBase/vectorCodec.js",
+      "blob_sha": "8b60a5732e7ffbe06197ca0928ece7e42ccabc6c",
+      "bytes": 1875
+    },
+    {
+      "path": "modules/tagmemoV10/immutable.js",
+      "blob_sha": "a8d3f5bb8a66057501f2ebde6931113b04750ad5",
+      "bytes": 14626
+    },
+    {
+      "path": "modules/tagmemoV10/riverObservability.js",
+      "blob_sha": "36981f2f784168a75f9bde6d5a050996e38f6bff",
+      "bytes": 4208
+    },
+    {
+      "path": "rust-vexus-lite/README.md",
+      "blob_sha": "fb394461d559cf86c28d606879490299fecc9185",
+      "bytes": 61905
+    },
+    {
+      "path": "rust-vexus-lite/AGENTS.md",
+      "blob_sha": "d0c840ac49a6095862c38b03512837d22b9aa2a8",
+      "bytes": 1220
+    },
+    {
+      "path": "rust-vexus-lite/Cargo.toml",
+      "blob_sha": "aacc29bea2768aabc4c51192cfffec2576fb02e6",
+      "bytes": 1595
+    },
+    {
+      "path": "rust-vexus-lite/Cargo.lock",
+      "blob_sha": "09e1f60ae6f018c1c7f188977eb4dcb443beb843",
+      "bytes": 58943
+    },
+    {
+      "path": "package-lock.json",
+      "blob_sha": "f0e3bcac419f31cbd4a138df01f500fca629eadf",
+      "bytes": 391986
+    },
+    {
+      "path": "rust-vexus-lite/build.rs",
+      "blob_sha": "9fc236788932b315126703962085b45ee88c802a",
+      "bytes": 65
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/LICENSE",
+      "blob_sha": "0cd60b710b767dd5a0017bcf3f68ca1e56c4facc",
+      "bytes": 11376
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/Cargo.toml",
+      "blob_sha": "d534729c3ed0102debd1e6bbbc8863cf6dfeebf1",
+      "bytes": 712
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/asset.rs",
+      "blob_sha": "da4ea22df065b6e6403253f7ad85aff633189dec",
+      "bytes": 10471
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/engine_tests.rs",
+      "blob_sha": "d281fe83bd17e4f236845c1443029e60dc672e8d",
+      "bytes": 11947
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/asset_tests.rs",
+      "blob_sha": "43dad98952d4791ebc107049078d96032d330f7e",
+      "bytes": 4152
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/index/bq.rs",
+      "blob_sha": "ced6b25c059cdc7eb5ea63f8d5de910c4f2ccdc0",
+      "bytes": 51256
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/engine.rs",
+      "blob_sha": "cd2e6af729b4a923126dc0fdc027cc3f73342c7d",
+      "bytes": 17514
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/index/quiver.rs",
+      "blob_sha": "c2fa418484259bd232793196d278a0b036ec42c0",
+      "bytes": 149384
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/index/quiver/corrected_sm/build.rs",
+      "blob_sha": "6d52319f7a1d3c27ddf70bdb68bca64529e73d58",
+      "bytes": 15325
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/index/quiver/corrected_sm.rs",
+      "blob_sha": "7c7f41810f251b3240daed54b42a43a1f75719c4",
+      "bytes": 73698
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/index/quiver/corrected_sm/dynamic.rs",
+      "blob_sha": "c0d7f234317ba5b4227d936490efdceccb0e8b84",
+      "bytes": 38437
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/index/quiver/corrected_sm/dynamic_search.rs",
+      "blob_sha": "2f277299c6800334d347c77ce0c608b4663b8a75",
+      "bytes": 11653
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/index/quiver/corrected_sm/dynamic_tests.rs",
+      "blob_sha": "f637c818c4d9555ca588c144ebd7bd344a11cbd8",
+      "bytes": 15374
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/index/quiver/corrected_sm/filter_tests.rs",
+      "blob_sha": "9714e10318410cc1507c6d384ba35d489fbe8e12",
+      "bytes": 1653
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/index/quiver/corrected_sm/l2_tests.rs",
+      "blob_sha": "5d5aedf2e4bd95af11f1da626280f013e1d318e5",
+      "bytes": 10230
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/index/quiver/corrected_sm/native_l2_tests.rs",
+      "blob_sha": "2efbddb83db3f0eca70108ff81e56fbb9ab99f25",
+      "bytes": 7139
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/index/quiver/corrected_sm/production_tests.rs",
+      "blob_sha": "29985b488bf8278921084bf6787a7e5cfa5b6b58",
+      "bytes": 10201
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/index/quiver/corrected_sm/production.rs",
+      "blob_sha": "0ac7c07a058b7206b6092b3f584a8dc01546fa0c",
+      "bytes": 13389
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/lib.rs",
+      "blob_sha": "0154b019d882bec6925969df0d533e27a506322a",
+      "bytes": 408
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/index/quiver/corrected_sm/routing_snapshot.rs",
+      "blob_sha": "34acf13d3834917501aa818947cfe947acb64308",
+      "bytes": 8906
+    },
+    {
+      "path": "rust-vexus-lite/crates/vcp-tdb-index/src/vector.rs",
+      "blob_sha": "b79e14472a78686e24d61bfba2e2e5f5842a647b",
+      "bytes": 20099
+    },
+    {
+      "path": "rust-vexus-lite/index.d.ts",
+      "blob_sha": "0a30a54e137fb4472c25d3167bcd5f04faa090f5",
+      "bytes": 22848
+    },
+    {
+      "path": "rust-vexus-lite/index.js",
+      "blob_sha": "a8b588825e073c2f8e3afdb9af72abd82e089712",
+      "bytes": 9368
+    },
+    {
+      "path": "rust-vexus-lite/package.json",
+      "blob_sha": "232a95ef206e6ffab0cdff959826faaa10f6fedb",
+      "bytes": 614
+    },
+    {
+      "path": "rust-vexus-lite/rust-toolchain.toml",
+      "blob_sha": "06a75fc72512f6cfe093ec32c56ebc066b6f7597",
+      "bytes": 50
+    },
+    {
+      "path": "rust-vexus-lite/src/global_chunks.rs",
+      "blob_sha": "3e7530efc0d3707f5c53b4d39e76e3d4478c520c",
+      "bytes": 25199
+    },
+    {
+      "path": "rust-vexus-lite/src/index_handle.rs",
+      "blob_sha": "d8622cae54653ee3472740d9417a7e430a0376d9",
+      "bytes": 3341
+    },
+    {
+      "path": "rust-vexus-lite/src/index_lifecycle.rs",
+      "blob_sha": "8bffefcd370e61a0b6684d53b482411e8555a0c3",
+      "bytes": 87133
+    },
+    {
+      "path": "rust-vexus-lite/src/index_maintenance.rs",
+      "blob_sha": "33c005f8b89b5cd1d0702ca730f9ae1beb8b8a34",
+      "bytes": 7154
+    },
+    {
+      "path": "rust-vexus-lite/src/index_source.rs",
+      "blob_sha": "c7b1465719579ebb145e53802fa31e9cc36dcbd0",
+      "bytes": 9919
+    },
+    {
+      "path": "rust-vexus-lite/src/ingestion.rs",
+      "blob_sha": "86d9096d586ad5113085d866cd81511ba9974d47",
+      "bytes": 117291
+    },
+    {
+      "path": "rust-vexus-lite/src/knowledge_runtime.rs",
+      "blob_sha": "5d277427ab5d0d0c9c59d2ace4b9968167c71494",
+      "bytes": 222794
+    },
+    {
+      "path": "rust-vexus-lite/src/memo_artifact_builder.rs",
+      "blob_sha": "bb31d895db9112af0dc747c30781de523c996c5c",
+      "bytes": 73897
+    },
+    {
+      "path": "rust-vexus-lite/src/lib.rs",
+      "blob_sha": "dca9b54a1baa388c57484bad4236ca50330be19b",
+      "bytes": 87569
+    },
+    {
+      "path": "rust-vexus-lite/src/light_memo.rs",
+      "blob_sha": "3433d6a86d953f6394a7b11548f9980db243a825",
+      "bytes": 24787
+    },
+    {
+      "path": "rust-vexus-lite/src/memo_projection.rs",
+      "blob_sha": "ab03eeb991e008409f74e39e64ab15ab3cd0b784",
+      "bytes": 20123
+    },
+    {
+      "path": "rust-vexus-lite/src/memo_pipeline.rs",
+      "blob_sha": "bfeb1f065c87d079f22a74f44f48451ac7066372",
+      "bytes": 126460
+    },
+    {
+      "path": "rust-vexus-lite/src/memo_geometry.rs",
+      "blob_sha": "1516c5d16132d2bb09f6baf8377bd331aacd8d27",
+      "bytes": 64134
+    },
+    {
+      "path": "rust-vexus-lite/src/memo_sensing.rs",
+      "blob_sha": "59bff27e62cf723aa2325bfa310adafb77561ce5",
+      "bytes": 45181
+    },
+    {
+      "path": "rust-vexus-lite/src/memo_thinking.rs",
+      "blob_sha": "864d3067733b2a4f2eb4220ff9c2980d06c73e62",
+      "bytes": 19795
+    },
+    {
+      "path": "rust-vexus-lite/src/memo_workspace.rs",
+      "blob_sha": "ac2312ba45787f94ff7348594ab42b73d098df6c",
+      "bytes": 13398
+    },
+    {
+      "path": "rust-vexus-lite/src/memo_workspace_build_tests.rs",
+      "blob_sha": "ca5cb89360705bf1e99301dcded10a9967b8b9f5",
+      "bytes": 5465
+    },
+    {
+      "path": "rust-vexus-lite/src/native_rerank.rs",
+      "blob_sha": "23c78e2d29818e8667855f28a18fdad9e36799f4",
+      "bytes": 23455
+    },
+    {
+      "path": "rust-vexus-lite/src/publication_gate.rs",
+      "blob_sha": "77913cdb888830406292cde43a43912670cdb34b",
+      "bytes": 5788
+    },
+    {
+      "path": "rust-vexus-lite/src/result_deduplicator.rs",
+      "blob_sha": "e677eec31c5243d072037884df5537aa0fb36ef2",
+      "bytes": 16415
+    },
+    {
+      "path": "rust-vexus-lite/src/retrieval_index.rs",
+      "blob_sha": "6cfce098f8d9c1861a9a016f4482191c458267d9",
+      "bytes": 16144
+    },
+    {
+      "path": "rust-vexus-lite/src/rivermemo_topology_v3.rs",
+      "blob_sha": "8e4887f92240fcfe3bce2895ee0db587b1f7e1a0",
+      "bytes": 159141
+    },
+    {
+      "path": "rust-vexus-lite/src/rivermemo_wormhole.rs",
+      "blob_sha": "d44b65815e118653a1cd1ce328a2b7607adeca68",
+      "bytes": 27860
+    },
+    {
+      "path": "rust-vexus-lite/src/schema.rs",
+      "blob_sha": "d5598f8fc12d7d97f72f308b264f83de3f2fc499",
+      "bytes": 35969
+    },
+    {
+      "path": "rust-vexus-lite/src/storage.rs",
+      "blob_sha": "306f3ab29ec9c16193f8a7f64809033b53e51b78",
+      "bytes": 49866
+    },
+    {
+      "path": "rust-vexus-lite/src/tag_consistency.rs",
+      "blob_sha": "fd3864851bbc9417186535cc09849a0432e01ea9",
+      "bytes": 54257
+    },
+    {
+      "path": "rust-vexus-lite/src/task_lifecycle.rs",
+      "blob_sha": "eb72cb3e841f81e4f85f1b8183bb26b15523f558",
+      "bytes": 5264
+    },
+    {
+      "path": "rust-vexus-lite/src/text.rs",
+      "blob_sha": "e39474f379d6407809f247353b6b876953331f5e",
+      "bytes": 16699
+    },
+    {
+      "path": "rust-vexus-lite/vexus-lite.win32-x64-msvc.node",
+      "blob_sha": "65ecff6ebc37a2eb6964d5654e7aba42ca640305",
+      "bytes": 14862336
+    },
+    {
+      "path": "rust-vexus-lite/vexus-lite.linux-x64-gnu.node",
+      "blob_sha": "153da0ab76a2a40f94ef83c3ed3f84a0206ffe18",
+      "bytes": 13180464
+    }
+  ]
+}

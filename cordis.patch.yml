@@ -1,0 +1,11 @@
+# Both entries load the same user-owned JSON configuration.
+# Relative configFile paths resolve from this package root, not the DSH profile.
+- insert:
+    - id: memory-companion-bootstrap
+      name: './src/bootstrap.mjs'
+      config:
+        configFile: './memory.config.json'
+    - id: memory-companion
+      name: './src/plugin.mjs'
+      config:
+        configFile: './memory.config.json'

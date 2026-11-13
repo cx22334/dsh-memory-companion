@@ -1,0 +1,39 @@
+{
+  "contextId": "default",
+  "timezone": "Asia/Tokyo",
+  "roles": [
+    { "id": "main", "alias": "main", "name": "主角色", "directory": "主角色" }
+  ],
+  "google": {
+    "protocol": "google",
+    "model": "gemini-embedding-001",
+    "dimensions": 768,
+    "apiKeyEnv": "GOOGLE_API_KEY",
+    "endpoint": "https://generativelanguage.googleapis.com/v1beta"
+  },
+  "chat": {
+    "model": "deepseek-chat",
+    "apiKeyEnv": "DEEPSEEK_API_KEY",
+    "endpoint": "https://api.deepseek.com/v1"
+  },
+  "recall": {
+    "engine": "tagmemo",
+    "tokenBudget": 1200,
+    "maxNotes": 5,
+    "candidateLimit": 100,
+    "timeoutMs": 1500,
+    "historyBudget": 4800
+  },
+  "diary": {
+    "enabled": true,
+    "maxPerTurn": 2,
+    "batchTokens": 4000,
+    "maxNotes": 6,
+    "dailyTokenBudget": 20000,
+    "quietMs": 60000,
+    "turnInterval": 8
+  },
+  "management": { "enabled": true, "host": "127.0.0.1", "port": 0 },
+  "host": { "contextOrder": 140, "captureTools": false, "persistenceBatchSize": 200 },
+  "security": { "mode": "host-enforced", "deploymentAcknowledged": false }
+}

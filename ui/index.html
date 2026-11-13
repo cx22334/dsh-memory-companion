@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>记忆手记 · DSH</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="记忆手记首页"><span class="brand-mark">记</span><span>记忆手记<small>DSH · 角色与共同经历</small></span></a>
+      <div id="connection" class="connection">正在连接…</div>
+      <label class="field sidebar-field">当前角色<select id="role-select" aria-label="当前角色"></select></label>
+      <label class="field sidebar-field">语境<input id="context-input" value="default" maxlength="200"></label>
+      <nav aria-label="管理页面">
+        <button data-view="notes" class="nav-button active">日记与来源</button>
+        <button data-view="proposals" class="nav-button">更正与整理</button>
+        <button data-view="snapshots" class="nav-button">回答的记忆依据</button>
+        <button data-view="replay" class="nav-button">回放预览</button>
+        <button data-view="policy" class="nav-button">使用与共享</button>
+        <button data-view="health" class="nav-button">状态与维护</button>
+      </nav>
+      <p class="sidebar-foot">日记保留角色的理解。<br>原话提供回查依据，不替理解作证。</p>
+    </aside>
+    <div class="workspace">
+      <header class="topbar"><div><p class="eyebrow">USER WORKSPACE</p><h1 id="page-title">日记与来源</h1></div><button id="refresh-button" class="button secondary">刷新</button></header>
+      <div id="notice" role="status" aria-live="polite" hidden></div>
+      <section id="login-panel" class="panel login-panel" hidden>
+        <h2>连接记忆管理</h2><p>从插件提供的本次管理链接进入，或粘贴访问令牌。令牌只保留在这个页面内。</p>
+        <form id="login-form"><label class="field">管理链接或令牌<input id="token-input" type="password" autocomplete="off" required></label><button class="button" type="submit">连接</button></form>
+      </section>
+      <main id="content" tabindex="-1"><p class="empty">正在读取记忆库…</p></main>
+    </div>
+  </div>
+  <dialog id="confirm-dialog" aria-labelledby="confirm-title">
+    <form method="dialog"><h2 id="confirm-title">确认操作</h2><p id="confirm-description"></p><pre id="confirm-preview"></pre><div class="dialog-actions"><button class="button secondary" value="cancel">返回</button><button class="button" id="confirm-accept" value="confirm">确认</button></div></form>
+  </dialog>
+  <script type="module" src="/app.mjs"></script>
+</body>
+</html>
