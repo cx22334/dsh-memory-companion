@@ -1,5 +1,7 @@
 # DSH Memory Companion
 
+下载本次源代码交付包：[dsh-memory-companion-1.0.0-dev.1.zip](releases/dsh-memory-companion-1.0.0-dev.1.zip?raw=true)（约 13.2 MB，含 vendor 原生文件；打包后未运行测试）。
+
 版本：`1.0.0-dev.1`。这是可供装配的源代码包，按使用者要求未进行依赖安装、测试、构建、类型检查、试启动或 DSH 安装。接口按 DSH `0.2.2-rc.3` 源码接入；真实桌面运行环境、原生模块加载和提示词缓存命中均需实际使用时确认。
 
 ## 这个插件负责什么
