@@ -45,7 +45,7 @@ export async function createMemoryService(input = {}) {
     config, vault, embedding, chat, index, recall, diary, management: null,
     health() {
       return {
-        version: '1.0.0-dev.1', status: closed ? 'closed' : 'open', config: publicConfig(config),
+        version: '1.0.0-dev.2', status: closed ? 'closed' : 'open', config: publicConfig(config),
         vault: vault.health(), index: index.health(), diary: diary.health(),
         errors: errors.slice(), executionEvidence: 'not-tested-during-development'
       };

@@ -34,6 +34,31 @@
     "turnInterval": 8
   },
   "management": { "enabled": true, "host": "127.0.0.1", "port": 0 },
+  "vcpDsl": {
+    "maxDeclarations": 12,
+    "defaultK": 5,
+    "maxK": 50,
+    "defaultThreshold": 0.6,
+    "mainSearchWeights": [0.7, 0.3],
+    "historySegmentLimit": 3,
+    "historyDecay": 0.85,
+    "books": {},
+    "semanticGroups": { "groups": {} },
+    "pipeline": {},
+    "river": {}
+  },
+  "jev": {
+    "endpoint": "",
+    "model": "",
+    "apiKeyEnv": "JEV_API_KEY",
+    "threshold": 0.7,
+    "maxCandidates": 12,
+    "concurrency": 4,
+    "timeoutMs": 4000,
+    "candidateChars": 1200,
+    "queryChars": 800,
+    "prompts": {}
+  },
   "host": { "contextOrder": 140, "captureTools": false, "persistenceBatchSize": 200 },
   "security": { "mode": "host-enforced", "deploymentAcknowledged": false }
 }

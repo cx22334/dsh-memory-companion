@@ -360,17 +360,18 @@ function renderPolicy() {
   update();
   const previewQuery = h('textarea', { rows: 3, required: true, placeholder: '输入一个问题，看看当前规则会选出哪些记忆。', maxlength: 4000 });
   const previewSession = h('input', { placeholder: '可选：采用已有会话的实际读取权限' });
+  const previewDeclaration = h('textarea', { rows: 2, maxlength: 8000, placeholder: '例如 [[主角色日记本::RiverMemo::Time::Jev]]；留空沿用基础自动召回。' });
   const previewExplicit = h('input', { type: 'checkbox' });
   const previewOutput = h('div');
   const previewForm = h('form', { onsubmit: event => {
     event.preventDefault();
     operate(previewForm.querySelector('button[type=submit]'), async () => {
-      const payload = roleParams({ query: previewQuery.value, session_id: previewSession.value.trim() || undefined, explicit: previewExplicit.checked });
+      const payload = roleParams({ query: previewQuery.value, declaration: previewDeclaration.value, session_id: previewSession.value.trim() || undefined, explicit: previewExplicit.checked });
       const result = await api('preview', payload);
       previewOutput.replaceChildren(h('div', { class: 'prose' }, result.rendered_text || '没有相关且符合使用规则的记忆。'), h('details', {}, h('summary', {}, '候选修订、预算和省略原因'), pre(result)));
       notify('候选预览已完成，没有生成聊天回复；预览快照单独标记。');
     });
-  } }, field('预览问题', previewQuery), field('会话编号', previewSession, '留空时只按所选角色自身与公共范围预览，不假定能读取其他角色。'), h('label', { class: 'check' }, previewExplicit, '这是一次明确要求回顾，允许使用“仅明确回顾”的记录。'), h('p', { class: 'hint' }, '点击后可能调用配置的查询嵌入服务，但不会调用聊天模型或写入日记。'), h('button', { type: 'submit', class: 'button' }, '预览当前候选'));
+  } }, field('预览问题', previewQuery), field('VCP 检索占位符', previewDeclaration, '复用同一解析器；不因填写日记本名而扩大权限。RoleValve 预览计数为 User=1、Assistant=0、System=1。'), field('会话编号', previewSession, '留空时只按所选角色自身与公共范围预览，不假定能读取其他角色。'), h('label', { class: 'check' }, previewExplicit, '这是一次明确要求回顾，允许使用“仅明确回顾”的记录。'), h('p', { class: 'hint' }, '点击后可能调用嵌入服务；声明 ::Jev 时也会把候选发送给已配置的 JEV 服务。不会生成聊天回复或写入日记。'), h('button', { type: 'submit', class: 'button' }, '预览当前候选'));
   return h('div', {}, panel('人设里的读取声明', h('p', {}, '这页生成供你手写进 DSH 人设前缀的声明，不会直接修改人设或授予角色权限。请放在原生人设的 prefix 部分；当前适配器不从可能被忽略的 suffix 授权。实际会话以宿主解析后的绑定为准。'), h('h3', {}, '允许读取哪些角色的记忆'), chips, h('label', { class: 'check' }, publicBox, '允许读取公共记录'), h('label', { class: 'check' }, timelineBox, '提供自己的时间线入口'), field('占位符', output), button('复制声明', async () => { await navigator.clipboard.writeText(output.value); notify('已复制。请粘贴到相应角色的人设前缀（prefix）中。'); }, '')),
     panel('管理后的候选预览', previewForm, previewOutput),
     panel('每条记忆的使用方式', ...Object.entries(usages).map(([key, label]) => h('div', { class: 'list-line' }, h('div', {}, h('strong', {}, label), h('small', {}, ({ normal: '相关时进入候选，不强行提起。', prefer_when_relevant: '在相关候选中优先，仍受纠错与预算限制。', explicit_only: '仅在使用者明确要求回顾时使用。', excluded: '停止默认使用；可同时选择排除来源片段。' })[key])))),

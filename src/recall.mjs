@@ -1,5 +1,6 @@
 import { MemoryError, canonical, hash, id, now, estimateTokens, serialQueue } from './common.mjs';
 import { bindingScope } from './index-engine.mjs';
+import { VcpRetrieval } from './vcp-retrieval.mjs';
 
 const CLAIMS = new Set(['claims_correction', 'claims_retraction']);
 const FINAL_RELATIONS = new Set(['confirmed', 'rejected']);
@@ -39,6 +40,7 @@ function orderGroup(notes, relations) {
 export class RecallService {
   constructor(config, { vault, index }) {
     this.config = config; this.vault = vault; this.index = index;
+    this.vcp = new VcpRetrieval(config, { vault, index });
     this.cache = new Map(); this.queue = serialQueue(); this.invalidations = new Map();
   }
 
@@ -199,7 +201,7 @@ export class RecallService {
     return true;
   }
 
-  async recall({ binding, turn_id, query, context = [], signal, explicit = false }) {
+  async recall({ binding, turn_id, query, context = [], signal, explicit = false, plans = [], messageCounts = {} }) {
     // Serializing this small service avoids two host pre-step calls publishing
     // different snapshots for the same turn. Native/model work is elsewhere.
     return this.queue(async () => {
@@ -207,15 +209,15 @@ export class RecallService {
       if (turn_id == null || !String(turn_id).length) throw new MemoryError('MISSING_TURN', 'A stable turn ID is required.');
       const scope = hash(bindingScope(binding, explicit));
       const cacheKey = hash([binding.session_id, scope, String(turn_id), explicit]);
-      const queryHash = hash(String(query || ''));
+      const queryHash = hash([String(query || ''), plans]);
       let state = await this._state(binding, explicit), cached = this.cache.get(cacheKey);
       if (cached?.queryHash === queryHash && await this._valid(cached, binding, explicit, state)) {
         cancelled(signal); this._binding(binding); return clone(cached.snapshot);
       }
       this.cache.delete(cacheKey);
       const searchQuery = await this._query(query, context, binding);
-      const result = searchQuery ? await this.index.search(searchQuery, binding, {
-        limit: this.config.recall.candidateLimit, signal, explicit }) : { candidates: [], engine: 'none', diagnostics: { status: 'empty_query' } };
+      const result = searchQuery ? await this.vcp.search({ binding, query: String(query || ''), fallbackQuery: searchQuery,
+        context, plans, messageCounts, signal, explicit }) : { candidates: [], engine: 'none', diagnostics: { status: 'empty_query' } };
       cancelled(signal);
       state = await this._state(binding, explicit);
       const ranked = new Map();
@@ -225,7 +227,7 @@ export class RecallService {
         const previous = ranked.get(group.group_id);
         if (!previous || hit.score > previous.score) ranked.set(group.group_id, { group, score: hit.score });
       }
-      const budget = this.config.recall.tokenBudget, maxNotes = this.config.recall.maxNotes;
+      const budget = this.config.recall.tokenBudget, maxNotes = result.maxNotes ?? this.config.recall.maxNotes;
       let items = [], blocks = [], signatures = {}, omitted = 0;
       for (const { group } of [...ranked.values()].sort((a, b) => b.score - a.score)) {
         cancelled(signal);
@@ -259,6 +261,8 @@ export class RecallService {
         keptItems.push(...items.filter(item => item.group_id === groupId)); keptBlocks.push(blocks[index]); keptSignatures[groupId] = signatures[groupId];
       }
       items = keptItems; blocks = keptBlocks; signatures = keptSignatures;
+      const admittedIds = new Set(items.map(item => item.note_id));
+      if (result.fullNoteIds?.some(noteId => !admittedIds.has(noteId))) throw new MemoryError('VCP_FULLTEXT_NOT_ADMITTED', '全文日记声明无法完整放入当前预算，或关联纠错组/来源失效。请使用 ::LastN、提高预算或改用 [[RAG]]；本次不会把部分内容冒充全文。');
       const rendered = items.length ? INTRO + blocks.join('\n') : '';
       cancelled(signal); this._binding(binding);
       const snapshot = { snapshot_id: id('snapshot'), created_at: now(), binding_id: binding.binding_id,
@@ -269,6 +273,8 @@ export class RecallService {
         omissions: omitted ? [{ code: 'WHOLE_GROUP_OMITTED', count: omitted }] : [], engine: result.engine,
         budget: { per_turn: budget, history_limit: this.config.recall.historyBudget },
         source_kind: 'plugin_synthetic', evidence_eligible: false, query_hash: queryHash };
+      snapshot.retrieval = result.diagnostics;
+      snapshot.declarations = plans;
       await this.vault.saveSnapshot(snapshot);
       cancelled(signal);
       this.cache.set(cacheKey, { snapshot, signatures, queryHash });

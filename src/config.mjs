@@ -50,6 +50,30 @@ export function normalizeConfig(input = {}) {
     host: { contextOrder: 140, captureTools: false, persistenceBatchSize: 200, ...(input.host || {}) },
     security: { mode: 'host-enforced', deploymentAcknowledged: false, ...(input.security || {}) }
   };
+  config.vcpDsl = {
+    maxDeclarations: 12, defaultThreshold: 0.6, defaultK: 5, maxK: 50,
+    historySegmentLimit: 3, historyDecay: 0.85, associateMaxSeeds: 6, mainSearchWeights: [0.7, 0.3],
+    books: {}, semanticGroups: { groups: {} }, pipeline: {}, river: {},
+    ...input.vcpDsl
+  };
+  config.jev = { endpoint: '', model: '', apiKeyEnv: 'JEV_API_KEY', threshold: 0.7,
+    maxCandidates: 12, concurrency: 4, timeoutMs: 4000, candidateChars: 1200, queryChars: 800,
+    prompts: {}, ...input.jev };
+  for (const [key, lo, hi] of [['maxDeclarations', 1, 50], ['defaultK', 1, 50], ['maxK', 1, 1000], ['historySegmentLimit', 0, 8], ['associateMaxSeeds', 1, 12]]) {
+    config.vcpDsl[key] = bounded(config.vcpDsl[key], config.vcpDsl[key], lo, hi);
+  }
+  for (const [key, lo, hi] of [['maxCandidates', 1, 100], ['concurrency', 1, 16], ['timeoutMs', 100, 60000], ['candidateChars', 100, 16000], ['queryChars', 100, 8000]]) {
+    config.jev[key] = bounded(config.jev[key], config.jev[key], lo, hi);
+  }
+  for (const n of [config.vcpDsl.defaultThreshold, config.vcpDsl.historyDecay, config.jev.threshold]) {
+    if (!Number.isFinite(n) || n < 0 || n > 1) throw new MemoryError('INVALID_CONFIG', 'Thresholds and decay must be in [0,1]');
+  }
+  if (!Array.isArray(config.vcpDsl.mainSearchWeights) || config.vcpDsl.mainSearchWeights.length !== 2 || config.vcpDsl.mainSearchWeights.some(x => !Number.isFinite(x) || x < 0) || config.vcpDsl.mainSearchWeights.every(x => x === 0)) throw new MemoryError('INVALID_CONFIG', 'mainSearchWeights requires two nonnegative weights with positive sum');
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/u.test(config.jev.apiKeyEnv) || 'apiKey' in config.jev || 'api_key' in config.jev) throw new MemoryError('INVALID_SECRET_REFERENCE', 'JEV key must use apiKeyEnv');
+  if (config.jev.endpoint) {
+    const url = new URL(config.jev.endpoint);
+    if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password) throw new MemoryError('INVALID_ENDPOINT', 'Invalid JEV endpoint');
+  }
   if (!['tagmemo', 'baseline'].includes(config.recall.engine)) throw new MemoryError('INVALID_ENGINE', '检索引擎必须是 tagmemo 或 baseline');
   if (!['google', 'openai-compatible'].includes(config.google.protocol)) throw new MemoryError('INVALID_EMBEDDING_PROTOCOL', '未知嵌入协议');
   if (!['127.0.0.1', '::1', 'localhost'].includes(config.management.host)) throw new MemoryError('MANAGEMENT_BIND', '管理界面只允许监听本机');
@@ -66,6 +90,8 @@ export function publicConfig(config) {
   return {
     vaultPath: config.vaultPath, roles: config.roles.map(({ persona, ...role }) => role), contextId: config.contextId,
     recall: config.recall, diary: config.diary,
+    vcpDsl: { enabled: true, syntax: 'VCP diary DSL', maxDeclarations: config.vcpDsl.maxDeclarations },
+    jev: { configured: !!config.jev.endpoint && !!config.jev.model, model: config.jev.model, threshold: config.jev.threshold },
     google: { model: config.google.model, dimensions: config.google.dimensions, protocol: config.google.protocol },
     chat: { model: config.chat.model },
     security: { mode: config.security.mode, deploymentAcknowledged: config.security.deploymentAcknowledged }

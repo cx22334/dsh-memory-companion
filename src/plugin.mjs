@@ -1,5 +1,6 @@
 /** DSH adapter using registered providers and durable events; never patches host history. */
 import { createMemoryService } from './service.mjs'
+import { prepareVcpAssembly } from './vcp-dsl.mjs'
 import { MemoryError, hash, id, now, estimateTokens } from './common.mjs'
 import { readHostConfig } from './host-config.mjs'
 
@@ -335,6 +336,12 @@ export async function apply(ctx, rawConfig = {}) {
     const session = context.agent?.session
     if (!session || closing) return next()
     const state = stateFor(session)
+    const plans = prepareVcpAssembly(assembly, config)
+    if (hash(state.retrievalPlans || []) !== hash(plans)) {
+      state.current = null
+      service.recall.invalidate(state.sessionId)
+    }
+    state.retrievalPlans = plans
     const declared = declarations(assembly, config)
     state.optedIn = declared !== null
     if (!declared) {
@@ -408,6 +415,12 @@ export async function apply(ctx, rawConfig = {}) {
     const snapshot = await service.recall.recall({
       binding, turn_id: `${state.sessionId}:${binding.epoch}:${payload.turn}`,
       query: state.query, context: state.recent, signal: payload.signal,
+      plans: state.retrievalPlans || [],
+      messageCounts: payload.messages.reduce((counts, message) => {
+        const role = message.role || (message.source?.kind === 'model' ? 'assistant' : message.source?.kind === 'user' ? 'user' : null)
+        if (role && Object.hasOwn(counts, role)) counts[role]++
+        return counts
+      }, { user: 0, assistant: 0, system: 1 }),
     })
     payload.signal.throwIfAborted()
     for (const item of snapshot.items ?? []) {

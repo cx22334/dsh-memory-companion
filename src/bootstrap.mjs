@@ -1,11 +1,16 @@
 /** Stable placeholder providers; deliberately independent of storage/native imports. */
 import { readHostConfig } from './host-config.mjs'
+import { prepareVcpAssembly } from './vcp-dsl.mjs'
 
 export const name = 'memory-companion-bootstrap'
 export const inject = ['systemPrompt']
 
 export async function apply(ctx, rawConfig = {}) {
   const config = await readHostConfig(rawConfig)
+  ctx.on('system-prompt/assemble', (assembly, _context, next) => {
+    prepareVcpAssembly(assembly, config)
+    return next()
+  })
   const roles = Array.isArray(config.roles) ? config.roles : []
   const aliases = new Set()
   for (const role of roles) {

@@ -204,8 +204,9 @@ export async function createTagMemoDomain({
 
     const runtimeConfig = { model: config.google.model, dimension };
     const facade = { dbPath, nativeKnowledgeRuntime: runtime, tagMemoV10Engine: null };
-    v9 = new TagMemoEngine(null, tagIndex, runtimeConfig, {}, facade);
-    v10 = new TagMemoV10Engine(null, tagIndex, runtimeConfig, {}, {
+    const ragParams = { KnowledgeBaseManager: { riverMemo: config.vcpDsl?.river || {} } };
+    v9 = new TagMemoEngine(null, tagIndex, runtimeConfig, ragParams, facade);
+    v10 = new TagMemoV10Engine(null, tagIndex, runtimeConfig, ragParams, {
       v9Engine: v9, getNativeRuntime: () => runtime,
     });
     facade.tagMemoV10Engine = v10;
@@ -213,7 +214,7 @@ export async function createTagMemoDomain({
     if (!await v9.doMatrixRebuild()) throw fail('TAGMEMO_ARTIFACT_FAILED', 'Native Memo geometry and graph were not published.');
     artifact = v10.getArtifactSnapshot({ buildIfMissing: false });
     if (!artifact?.artifactSig) throw fail('TAGMEMO_ARTIFACT_FAILED', 'Native Memo artifact handle is unavailable.');
-    river = new RiverMemoEngine(v10);
+    river = new RiverMemoEngine(v10, { config: config.vcpDsl?.river || {} });
     abort(signal);
     await writeJSONAtomic(manifestPath, {
       generation, upstream: UPSTREAM, scopeHash, fingerprint, modelSig,
@@ -228,7 +229,8 @@ export async function createTagMemoDomain({
 
     return {
       engine: ENGINE,
-      search(queryVector, queryText, { limit = 30, signal: querySignal } = {}) {
+      search(queryVector, queryText, { limit = 30, signal: querySignal,
+        coreTags = [], ghostTags = [], supplementalVectors = [], sparseHits = [], timeHits = [], bm25Weight = 0.6 } = {}) {
         return runSerial(async () => {
           abort(querySignal);
           if (!nativeRows.length) return [];
@@ -242,7 +244,8 @@ export async function createTagMemoDomain({
             // KBM's JS production facade selects 0.1 for cross-domain language.
             const raw = await tagIndex.runMemoPipeline(dbPath, artifact.artifactSig,
               JSON.stringify({ queryId: randomUUID(), queryText: String(queryText || ''),
-                coreTags: [], ghostTags: [], config: { langPenaltyCrossDomain: 0.1 } }),
+                coreTags, ghostTags,
+                config: { langPenaltyCrossDomain: 0.1, ...(config.vcpDsl?.pipeline || {}) } }),
               query, new Float32Array(0));
             const metadata = json(raw?.metadataJson);
             observationHandle = metadata?.observationHandle;
@@ -261,6 +264,28 @@ export async function createTagMemoDomain({
               if (!source) throw fail('TAGMEMO_DOMAIN_ESCAPE', 'Native candidate is outside the current source snapshot.');
               const previous = candidates.get(item.id);
               if (!previous || item.score > previous.score) candidates.set(item.id, { ...source, ...item });
+            }
+            // VCP Shotgun history supplements, bounded to the same ACL/book domain.
+            for (const supplement of supplementalVectors) {
+              abort(querySignal);
+              const extra = json(await runtime.searchDiaryIndices(diaryNames,
+                vector(supplement.vector, dimension, 'History'), Math.max(2, Math.round(candidateK / 2)), candidateK));
+              for (const item of extra.results || []) {
+                const source = nativeToNote.get(Number(item.id)); if (!source) continue;
+                const score = item.score * supplement.weight;
+                if (!candidates.has(item.id) || score > candidates.get(item.id).score) candidates.set(item.id, { ...source, ...item, score });
+              }
+            }
+            const byNote = new Map([...nativeToNote.values()].map(row => [row.note_id, row]));
+            const maxSparse = Math.max(1, ...sparseHits.map(hit => hit.score));
+            for (const hit of sparseHits) {
+              const source = byNote.get(hit.note_id);
+              if (!source || source.revision_id !== hit.revision_id) continue;
+              const previous = candidates.get(source.id) || { ...source, score: 0 };
+              const sparse = hit.score / maxSparse;
+              candidates.set(source.id, { ...previous, bm25Score: sparse,
+                hybridScore: (1 - bm25Weight) * previous.score + bm25Weight * sparse,
+                score: (1 - bm25Weight) * previous.score + bm25Weight * sparse });
             }
             abort(querySignal);
             const empty = [];
@@ -283,7 +308,9 @@ export async function createTagMemoDomain({
               { artifact, dbPath, topK, observationHandle, nativePreparedQuery: prepared,
                 nativeJointQuery: false, includeTrace: false });
             abort(querySignal);
-            lastQuery = { algorithm: result.algorithmVersion, candidates: candidates.size, returned: result.results.length };
+            lastQuery = { algorithm: result.algorithmVersion, candidates: candidates.size, returned: result.results.length,
+              omega: result.omega?.omega ?? null, coreTags: coreTags.length, ghosts: ghostTags.length,
+              historyQueries: supplementalVectors.length, sparseCandidates: sparseHits.length, explicitTimeCandidates: timeHits.length };
             return result.results.map(item => {
               const source = nativeToNote.get(Number(item.id));
               if (!source) throw fail('TAGMEMO_DOMAIN_ESCAPE', 'Native readout is outside the current source snapshot.');

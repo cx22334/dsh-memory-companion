@@ -3,6 +3,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { BM25 } from '../vendor/vcprag/bm25.js';
 import { tokenize } from '../vendor/vcprag/tokenize.js';
+import { matchesSelection } from './vcp-dsl.mjs';
 import { MemoryError, canonical, hash, readJSON, writeJSONAtomic, serialQueue } from './common.mjs';
 
 const require = createRequire(import.meta.url);
@@ -83,17 +84,18 @@ export class IndexEngine {
       { model: this.config.google.model, dimensions: this.config.google.dimensions, endpoint: this.config.google.endpoint };
   }
 
-  async _view(binding, explicit = false) {
+  async _view(binding, explicit = false, selection = null) {
     this._assertBinding(binding);
     // listNotes also observes external edits. Filtering precedes all statistics.
     const notes = (await this.vault.listNotes({ context_id: binding.context_id }))
-      .filter(note => this.vault.isEligible(note, binding, { explicit }))
+      .filter(note => this.vault.isEligible(note, binding, { explicit }) && matchesSelection(note, selection))
       .sort((a, b) => a.note_id.localeCompare(b.note_id));
     this._assertBinding(binding);
-    const scopeHash = hash({ acl: bindingScope(binding, explicit), embedding: this._embeddingSignature() });
+    const scopeHash = hash({ acl: bindingScope(binding, explicit), selection, embedding: this._embeddingSignature(),
+      pipeline: this.config.vcpDsl.pipeline, river: this.config.vcpDsl.river });
     const fingerprint = hash({ version: 2, scopeHash, notes: notes.map(note => [note.note_id, note.revision_id,
       note.tags || [], note.body || '', note.kind, note.owner_role_id, note.author_role_id, note.source_time]) });
-    return { notes, scopeHash, fingerprint, explicit };
+    return { notes, scopeHash, fingerprint, explicit, selection };
   }
 
   _domain(view, binding) {
@@ -160,7 +162,7 @@ export class IndexEngine {
         cancelled(signal);
         if (generation !== this.generation) { domain.status = 'retired'; return domain; }
         // A build that outlived a source/ACL change is never published.
-        const current = await this._view(domain.binding, domain.explicit);
+        const current = await this._view(domain.binding, domain.explicit, domain.selection);
         if (current.fingerprint !== domain.fingerprint) { domain.status = 'retired'; return domain; }
         await fs.mkdir(domain.directory, { recursive: true });
         if (this.tdbClass) {
@@ -217,12 +219,14 @@ export class IndexEngine {
     return vector;
   }
 
-  async search(query, binding, { limit = this.config.recall.candidateLimit, signal, explicit = false } = {}) {
+  async search(query, binding, { limit = this.config.recall.candidateLimit, signal, explicit = false,
+    selection = null, queryVector = null, coreTags = [], ghostTags = [], supplementalVectors = [],
+    sparseHits = [], timeHits = [], bm25Weight = 0.6 } = {}) {
     cancelled(signal); this._assertBinding(binding);
     const text = String(query ?? '').trim();
     const max = Math.max(1, Math.min(Number(limit) || 100, this.config.recall.candidateLimit));
     if (!text) return { candidates: [], engine: 'none', diagnostics: { status: 'empty_query' } };
-    const view = await this._view(binding, explicit), domain = this._domain(view, binding);
+    const view = await this._view(binding, explicit, selection), domain = this._domain(view, binding);
     const deadline = Date.now() + this.config.recall.timeoutMs;
     let candidates = this._lexical(domain, text, max), engine = 'bm25-degraded';
     this._startBuild(domain);
@@ -236,10 +240,11 @@ export class IndexEngine {
       const timeout = AbortSignal.timeout(Math.max(1, deadline - Date.now()));
       const querySignal = signal ? AbortSignal.any([signal, timeout, this.stop.signal]) : AbortSignal.any([timeout, this.stop.signal]);
       try {
-        const vector = await this._queryVector(text, domain, querySignal);
+        const vector = queryVector ? normalized(queryVector, this.config.google.dimensions) : await this._queryVector(text, domain, querySignal);
         cancelled(signal);
         if (this.config.recall.engine === 'tagmemo' && domain.tagmemo) {
-          candidates = await domain.tagmemo.search(vector, text, { limit: max, signal: querySignal });
+          candidates = await domain.tagmemo.search(vector, text, { limit: max, signal: querySignal,
+            coreTags, ghostTags, supplementalVectors, sparseHits, timeHits, bm25Weight });
           engine = domain.tagmemo.engine;
         } else if (domain.tdb) {
           candidates = domain.tdb.searchHybrid(vector, text, max, 0, 0, 0.7).map(hit => ({
@@ -250,7 +255,7 @@ export class IndexEngine {
     }
     // Re-check the entire corpus, not only returned hits: a removed private note
     // must not continue affecting another note's rank through old graph statistics.
-    const latest = await this._view(binding, explicit);
+    const latest = await this._view(binding, explicit, selection);
     if (latest.fingerprint !== domain.fingerprint) {
       const fresh = this._domain(latest, binding); this._startBuild(fresh);
       return { candidates: this._lexical(fresh, text, max), engine: 'bm25-degraded',
@@ -264,7 +269,8 @@ export class IndexEngine {
     }
     return { candidates: [...unique.values()].sort((a, b) => b.score - a.score).slice(0, max), engine,
       diagnostics: { status: domain.status, scope_hash: domain.scopeHash, fingerprint: domain.fingerprint,
-        configured_engine: this.config.recall.engine, actual_engine: engine, errors: structuredClone(domain.errors) } };
+        configured_engine: this.config.recall.engine, actual_engine: engine,
+        omega: domain.tagmemo?.health().lastQuery?.omega ?? null, errors: structuredClone(domain.errors) } };
     } finally { domain.users--; await this._prune(); }
   }
 

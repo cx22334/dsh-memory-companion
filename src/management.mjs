@@ -5,6 +5,7 @@ import { readFile, mkdir, lstat, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { MemoryError, id, now, safeSegment } from './common.mjs';
+import { parseVcpText } from './vcp-dsl.mjs';
 
 const UI_ROOT = fileURLToPath(new URL('../ui/', import.meta.url));
 const BODY_LIMIT = 256 * 1024;
@@ -312,7 +313,10 @@ export async function startManagement(service) {
         }
         case 'POST /api/replay': result = await service.diary.replay({ binding: await managementBinding(service, input), question: string(input.question, 'question', { max: 16000 }), snapshot_id: string(input.snapshot_id, 'snapshot_id', { optional: true }), modified_note_ids: strings(input.modified_note_ids, 'modified_note_ids', 30) }); break;
         case 'POST /api/preview': {
-          result = await service.recall.recall({ binding: await managementBinding(service, input), turn_id: `management-preview:${randomBytes(16).toString('hex')}`, query: string(input.query, 'query', { max: 4000 }), context: [], explicit: input.explicit === true });
+          const declaration = string(input.declaration, 'declaration', { optional: true, max: 8000 }) || '';
+          const plans = parseVcpText(declaration, service.config).plans;
+          result = await service.recall.recall({ binding: await managementBinding(service, input), turn_id: `management-preview:${randomBytes(16).toString('hex')}`, query: string(input.query, 'query', { max: 4000 }), context: [], explicit: input.explicit === true,
+            plans, messageCounts: { user: 1, assistant: 0, system: 1 } });
           break;
         }
         case 'POST /api/export': result = await service.vault.exportTo(await exportDestination(service.config, input.name)); break;
