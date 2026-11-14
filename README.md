@@ -35,10 +35,12 @@
    npm 依赖固定为 `yaml 2.8.1` 和 `triviumdb 0.9.0`。TDB 声明为 optional dependency，是为了原生安装失败时保留文件管理和词法降级，并非取消 TDB。未提供经安装生成的 lockfile，也没有执行安装生命周期脚本。
 
 3. **配置不需要手动创建。** 插件第一次启动时会自动生成 `$DSH_HOME/memory-companion/memory.config.json`（未设置 `DSH_HOME` 时是 `~/.dsh/memory-companion/`），日志里会打印实际路径。配置放在 DSH 家目录而不是插件包里，因为 DSH 安装插件时会把包复制进 profile 的 `node_modules`，重装或更新会覆盖包目录。自动生成的配置：
-   - 角色：一个 `main`（主角色），人设里对应 `{{mem_self_main}}`。要改名字或加角色，编辑这个文件后重启 DSH。
+   - 角色：一个 `main`（主角色），人设里对应 `{{mem_self_main}}`。
    - 记忆库：系统「文档」目录下的 `DSH-Memory`（Linux 按 XDG 设置，如 `~/文档/DSH-Memory`）。不能放在 DSH 家目录里。
    - 时区：取系统时区。模型、嵌入、预算等其余项与 `memory.config.example.json` 相同。
-4. 为启动 DSH 的环境提供 `GOOGLE_API_KEY`、`DEEPSEEK_API_KEY`，或在配置里修改 `apiKeyEnv` 指向已有变量。不要把密钥写进人设或 JSON。桌面应用必须能继承相应环境变量。
+
+   平时不用碰这个文件：**DSH Web 侧栏里有「记忆」入口**，右侧页面分「概览 / 角色 / 模型与密钥 / 检索与日记」四页，改完点「保存配置」，重启 DSH 生效。页面在记忆服务没能启动时也能打开（比如还没填密钥），概览页会显示原因。
+4. API 密钥在「记忆 → 模型与密钥」页填写，存进 DSH 自己的凭据管理（`$DSH_HOME/.credentials.yaml`），不写进记忆配置。也可以继续用同名环境变量或 `$DSH_HOME/.env`；页面会显示每个密钥当前来自哪里。不要把密钥写进人设或 JSON。
 5. 部署门控：自动生成的配置里 `security.deploymentAcknowledged` 为 `true`，按个人单机使用默认启动。这表示接受「DSH 的文件/命令工具在技术上能直接读写记忆库」，插件自身的工具仍只允许追加和提议。需要严格隔离的部署，把它改回 `false`，并按 `docs/host-adapter.md` 在宿主或 OS 层限制模型工具。
 6. 关闭目标 DSH 实例后，将本地包加入需要的 profile：
 

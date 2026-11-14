@@ -3,6 +3,8 @@ import { createMemoryService } from './service.mjs'
 import { prepareVcpAssembly } from './vcp-dsl.mjs'
 import { MemoryError, hash, id, now, estimateTokens } from './common.mjs'
 import { readHostConfig } from './host-config.mjs'
+import { preloadSecrets } from './secrets.mjs'
+import { markStarting, markRunning, markFailed, markStopped } from './runtime-state.mjs'
 
 export const name = 'memory-companion'
 export const inject = ['systemPrompt', 'tools', 'sessionPersistence']
@@ -138,12 +140,22 @@ const sourceSchema = {
 
 /** Only an explicit deployment acknowledgement admits the DSH-facing local adapter. */
 export async function apply(ctx, rawConfig = {}) {
-  rawConfig = await readHostConfig(rawConfig)
-  if (rawConfig.security?.mode !== 'host-enforced' || rawConfig.security?.deploymentAcknowledged !== true) {
-    throw new MemoryError('ISOLATION_REQUIRED', '记忆插件未启动：须先用宿主沙箱或独立OS权限隔离模型对记忆库、身份配置和管理凭据的直接读写，再明确设置security.mode=host-enforced及deploymentAcknowledged=true。此配置是部署声明，不是插件自动验证。')
+  markStarting()
+  let service
+  try {
+    rawConfig = await readHostConfig(rawConfig)
+    if (rawConfig.security?.mode !== 'host-enforced' || rawConfig.security?.deploymentAcknowledged !== true) {
+      throw new MemoryError('ISOLATION_REQUIRED', '记忆插件未启动：须先用宿主沙箱或独立OS权限隔离模型对记忆库、身份配置和管理凭据的直接读写，再明确设置security.mode=host-enforced及deploymentAcknowledged=true。此配置是部署声明，不是插件自动验证。')
+    }
+    // 密钥优先取 DSH 凭据管理里保存的值（设置页填写的），再退回环境变量。
+    await preloadSecrets([rawConfig.google?.apiKeyEnv || 'GOOGLE_API_KEY', rawConfig.chat?.apiKeyEnv || 'DEEPSEEK_API_KEY', rawConfig.jev?.apiKeyEnv])
+    service = await createMemoryService(rawConfig)
+  } catch (error) {
+    markFailed(error)
+    throw error
   }
-
-  const service = await createMemoryService(rawConfig)
+  markRunning(service)
+  ctx.effect(() => () => markStopped())
   const config = service.config
   const states = new Map()
   const captureFailures = new Map()

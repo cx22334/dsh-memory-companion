@@ -1,8 +1,15 @@
-# Both entries share one configuration file. Without configFile, the plugin uses
-# $DSH_HOME/memory-companion/memory.config.json and generates it on first start,
-# so reinstalling the package (which replaces node_modules) keeps your settings.
-# To use another file, add `configFile: '/absolute/path.json'` under both configs.
+# Three rows, one shared configuration file.
+# - memory-companion-settings: named by package, so DSH's client module system
+#   serves ./client/client.js (the 「记忆」 sidebar page) and the settings RPC runs
+#   even when the memory service itself cannot start (e.g. missing API keys).
+# - memory-companion-bootstrap: persona placeholders only, no storage imports.
+# - memory-companion: the memory service.
+# Without configFile, the plugin uses $DSH_HOME/memory-companion/memory.config.json
+# and generates it on first start; reinstalling the package keeps your settings.
 - insert:
+    - id: memory-companion-settings
+      name: 'dsh-memory-companion'
+      config: {}
     - id: memory-companion-bootstrap
       name: './src/bootstrap.mjs'
       config: {}

@@ -1,9 +1,10 @@
 import { createJudge, applyVerdicts } from '../vendor/vcprag/relevance-judge.js';
 import { MemoryError } from './common.mjs';
+import { secretValue } from './secrets.mjs';
 
 /** Reuse dsh-vcprag's per-document noul judge; no traditional rerank endpoint. */
 export async function judgeWithJev(query, candidates, notes, options, config, { signal, omega = null } = {}) {
-  const key = process.env[config.apiKeyEnv];
+  const key = secretValue(config.apiKeyEnv);
   if (!config.endpoint || !config.model || !key) throw new MemoryError('JEV_NOT_CONFIGURED', '::Jev 需要配置 jev.endpoint、jev.model 和对应 apiKeyEnv 环境变量。');
   const prompt = options.preset ? config.prompts?.[options.preset] : config.prompt;
   if (options.preset && !prompt) throw new MemoryError('JEV_PRESET_MISSING', `::Jev${options.preset} 未配置对应 prompts 预设。`);

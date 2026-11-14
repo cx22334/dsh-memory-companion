@@ -1,20 +1,25 @@
 {
   "name": "dsh-memory-companion",
-  "version": "1.0.0-dev.3",
+  "version": "1.0.0-dev.4",
   "description": "File-first character diaries, provenance and replaceable TagMemo retrieval for DSH",
   "type": "module",
   "private": true,
   "license": "CC-BY-NC-SA-4.0",
   "engines": { "node": ">=24.9.0" },
-  "main": "./src/plugin.mjs",
+  "main": "./src/settings-host.mjs",
   "exports": {
-    ".": "./src/plugin.mjs",
+    ".": "./src/settings-host.mjs",
+    "./client": "./client/client.js",
+    "./plugin": "./src/plugin.mjs",
     "./bootstrap": "./src/bootstrap.mjs",
     "./service": "./src/service.mjs"
   },
   "bin": { "dsh-memory": "./src/cli.mjs" },
-  "dsh": { "bundle": { "patch": "./cordis.patch.yml" } },
-  "files": ["src", "ui", "vendor", "docs", "schemas", "cordis.patch.yml", "memory.config.example.json", "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md"],
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": { "platform": "web" }
+  },
+  "files": ["src", "client", "ui", "vendor", "docs", "schemas", "cordis.patch.yml", "memory.config.example.json", "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md"],
   "dependencies": { "yaml": "2.8.1", "dayjs": "1.11.13" },
   "optionalDependencies": { "triviumdb": "0.9.0" }
 }

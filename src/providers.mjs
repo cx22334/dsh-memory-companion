@@ -1,4 +1,5 @@
 import { MemoryError, canonical, hash } from './common.mjs';
+import { secretValue } from './secrets.mjs';
 
 /**
  * Bounded REST transports. No provider call is retried automatically: an
@@ -23,8 +24,8 @@ function keyFromEnvironment(name, optional = false) {
   if (typeof name !== 'string' || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) {
     throw new MemoryError('PROVIDER_CONFIG', 'API 密钥必须通过有效的环境变量名称配置。');
   }
-  const value = process.env[name];
-  if (!value && !optional) throw new MemoryError('PROVIDER_NOT_CONFIGURED', `缺少环境变量 ${name}。`);
+  const value = secretValue(name);
+  if (!value && !optional) throw new MemoryError('PROVIDER_NOT_CONFIGURED', `缺少密钥 ${name}：在 DSH 侧栏「记忆」的模型与密钥页填写，或设置同名环境变量。`);
   return value || '';
 }
 
@@ -102,7 +103,7 @@ export class GoogleEmbedding {
 
   get configured() {
     return Boolean(this.config.model && Number.isInteger(this.config.dimensions) && this.config.dimensions > 0
-      && process.env[this.config.apiKeyEnv || 'GOOGLE_API_KEY']);
+      && secretValue(this.config.apiKeyEnv || 'GOOGLE_API_KEY'));
   }
 
   signature() {
@@ -187,7 +188,7 @@ export class GoogleEmbedding {
 /** OpenAI-compatible non-streaming generation. It never exposes or executes tools. */
 export class ChatProvider {
   constructor(config) { this.config = config.chat || config; this.requests = 0; this.errors = 0; }
-  get configured() { return Boolean(this.config.model && this.config.endpoint && (this.config.allowAnonymous || process.env[this.config.apiKeyEnv || 'OPENAI_API_KEY'])); }
+  get configured() { return Boolean(this.config.model && this.config.endpoint && (this.config.allowAnonymous || secretValue(this.config.apiKeyEnv || 'OPENAI_API_KEY'))); }
 
   async generate({ system, user, maxTokens = 2400, signal }) {
     if (!this.configured) throw new MemoryError('PROVIDER_NOT_CONFIGURED', '后台日记模型尚未配置。');
