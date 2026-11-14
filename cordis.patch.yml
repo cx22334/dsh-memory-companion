@@ -1,11 +1,11 @@
-# Both entries load the same user-owned JSON configuration.
-# Relative configFile paths resolve from this package root, not the DSH profile.
+# Both entries share one configuration file. Without configFile, the plugin uses
+# $DSH_HOME/memory-companion/memory.config.json and generates it on first start,
+# so reinstalling the package (which replaces node_modules) keeps your settings.
+# To use another file, add `configFile: '/absolute/path.json'` under both configs.
 - insert:
     - id: memory-companion-bootstrap
       name: './src/bootstrap.mjs'
-      config:
-        configFile: './memory.config.json'
+      config: {}
     - id: memory-companion
       name: './src/plugin.mjs'
-      config:
-        configFile: './memory.config.json'
+      config: {}

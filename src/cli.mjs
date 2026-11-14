@@ -3,6 +3,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { normalizeConfig, managementAccessPath } from './config.mjs';
+import { defaultConfigPath } from './host-config.mjs';
 import { readJSON, writeJSONAtomic, MemoryError, publicError, safeSegment, within } from './common.mjs';
 
 const HELP = `DSH Memory Companion
@@ -54,7 +55,8 @@ async function main() {
     process.stdout.write(`${JSON.stringify(await copyIsolated(values.source, values.destination), null, 2)}\n`);
     return;
   }
-  const configPath = path.resolve(values.config || 'memory.config.json');
+  // 不指定 --config 时，用插件在 DSH 家目录下自动生成的那份配置。
+  const configPath = path.resolve(values.config || defaultConfigPath());
   if (command === 'init') {
     const role = safeSegment(values.role || 'companion');
     if (!/^[a-z][a-z0-9_]*$/u.test(role)) throw new MemoryError('INVALID_ROLE_ALIAS', '--role 使用小写字母、数字和下划线');

@@ -79,15 +79,17 @@ dsh plugin --profile tui add "C:\Users\Kabuqinuo\Documents\Codex\2026-11-13\new-
 
 把 `tui` 换成实际使用的 profile。Desktop 使用 `desktop`；`apps/cli/src/plugin.ts:11–14` 要求先由 Desktop 打开一次以初始化 profile，再完全退出后运行该命令。`plugin-manager/src/operations.ts:95–126,566–567` 会把新安装且声明了有效 bundle 的依赖加入 `dsh.profile.bundles`。包管理器/平台/版本限制仍可能拒绝安装；这里不声称已经安装或实际加载成功。`install-spec.ts:70` 接受本地绝对路径及绝对 `file:`、`link:` spec。
 
-随包 patch 是实际装配示例，两行均使用 `configFile:'./memory.config.json'`。安装前把随包 `memory.config.example.json` 复制为 `memory.config.json` 并配置；缺失、不可读、无效 JSON 或非对象会明确报错，不静默使用空配置。相对 configFile 由只依赖 Node 内置模块的 `src/host-config.mjs` 通过 import.meta.url 从**插件包根**解析，也支持绝对路径。若修改 profile 的用户 patch，可分别针对 `id: memory-companion-bootstrap` 和 `id: memory-companion` 设置同一个绝对 configFile。配置文件内容先加载，再以同行其余内联字段浅覆盖，不做递归合并；宿主 patch 的 `config` 本身同样是整块替换。两入口必须使用一致角色配置。
+随包 patch 的两行都不指定 `configFile`。`src/host-config.mjs`（只依赖 Node 内置模块）按以下顺序找配置：patch 里显式写了且存在的 `configFile`（相对路径从**插件包根**解析，也支持绝对路径）→ `$DSH_HOME/memory-companion/memory.config.json`（未设 `DSH_HOME` 时为 `~/.dsh/memory-companion/`）→ 都没有时，以随包 `memory.config.example.json` 为底自动生成到后者，换成本机的文档目录、系统时区，并把 `deploymentAcknowledged` 设为 `true`。两个入口同时首次启动时，先写临时文件再用硬链接原子发布，只有一份生效。已有文件但不可读、不是合法 JSON 或不是对象时明确报错，不会被自动覆盖。若修改 profile 的用户 patch，可分别针对 `id: memory-companion-bootstrap` 和 `id: memory-companion` 设置同一个绝对 configFile。配置文件内容先加载，再以同行其余内联字段浅覆盖，不做递归合并；宿主 patch 的 `config` 本身同样是整块替换。两入口必须使用一致角色配置。
 
-示例配置中的 `deploymentAcknowledged:false` 会让业务插件明确拒绝启动；只有配置 JSON 可读且有效时，独立 bootstrap 才能提供稳定占位符。它不导入业务服务、TDB 或模型提供商，业务模块加载失败不会连带卸载这条 bootstrap。正式启用前须完成前述部署隔离并填写实际 vault/provider/预算/管理配置。不要在模型可读的配置中写管理 token 或提供商密钥。
+手写配置时若 `deploymentAcknowledged:false`，业务插件会明确拒绝启动（自动生成的配置为 `true`）；只有配置 JSON 可读且有效时，独立 bootstrap 才能提供稳定占位符。它不导入业务服务、TDB 或模型提供商，业务模块加载失败不会连带卸载这条 bootstrap。正式启用前须完成前述部署隔离并填写实际 vault/provider/预算/管理配置。不要在模型可读的配置中写管理 token 或提供商密钥。
 
 服务已由 DSH 打开时，在用户终端中进入本插件包目录，通过以下入口取得当前管理地址：
 
 ```powershell
-node src/cli.mjs open --config "C:\用户配置目录\memory-config.json"
+node src/cli.mjs open
 ```
+
+不写 `--config` 时，CLI 读取与插件相同的自动生成配置（`$DSH_HOME/memory-companion/memory.config.json`），所以终端里的 `DSH_HOME` 要和启动 DSH 时一致。
 
 该命令由项目 CLI 实现，读取本次服务的用户 runtime 凭据文件，不再打开第二个 Vault。它不是 DSH 启动器。配置应指向与宿主完全相同的库；runtime 凭据文件必须纳入模型工具隔离范围，不入记忆库、备份或模型会话。`/memory status` 只提示此用户入口，不输出管理 token。
 

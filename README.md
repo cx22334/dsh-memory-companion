@@ -1,6 +1,6 @@
 # DSH Memory Companion
 
-下载本次源代码交付包：[dsh-memory-companion-1.0.0-dev.1.zip](releases/dsh-memory-companion-1.0.0-dev.1.zip?raw=true)（约 13.2 MB，含 vendor 原生文件；打包后未运行测试）。
+下载：用 GitHub 的 Code → Download ZIP 取当前版本。`releases/` 里的 dev.1 压缩包是旧版本，不含自动生成配置等后续修改。
 
 版本：`1.0.0-dev.1`。这是可供装配的源代码包，按使用者要求未进行依赖安装、测试、构建、类型检查、试启动或 DSH 安装。接口按 DSH `0.2.2-rc.3` 源码接入；真实桌面运行环境、原生模块加载和提示词缓存命中均需实际使用时确认。
 
@@ -25,19 +25,21 @@
 以下命令为用户安装步骤，本次未执行。需要 Node **24.9 或以上**。随包原生浪潮文件支持 Windows x64 MSVC 与 Linux x64 GNU；其他平台需另行构建匹配版本。
 
 1. 将整个 `dsh-memory-companion` 目录解压到长期保留的位置，例如 `C:\DSH-Plugins\dsh-memory-companion`。请保留完整 vendor 目录。
-2. 在该目录安装依赖并生成自己的配置：
+2. 在该目录安装依赖：
 
    ```powershell
    Set-Location 'C:\DSH-Plugins\dsh-memory-companion'
    npm install
-   Copy-Item -LiteralPath '.\memory.config.example.json' -Destination '.\memory.config.json'
    ```
 
    npm 依赖固定为 `yaml 2.8.1` 和 `triviumdb 0.9.0`。TDB 声明为 optional dependency，是为了原生安装失败时保留文件管理和词法降级，并非取消 TDB。未提供经安装生成的 lockfile，也没有执行安装生命周期脚本。
 
-3. 编辑 `memory.config.json`：角色名字/目录、聊天模型、嵌入配置和记忆库路径。未填写 `vaultPath` 时使用当前系统用户的 `Documents/DSH-Memory`；如自定义 Windows 路径，可写 `"vaultPath": "D:/AI-Memory"`。不要放在 `.dsh` 下。示例模型只是配置起点，需与自己的接口和账号一致。
+3. **配置不需要手动创建。** 插件第一次启动时会自动生成 `$DSH_HOME/memory-companion/memory.config.json`（未设置 `DSH_HOME` 时是 `~/.dsh/memory-companion/`），日志里会打印实际路径。配置放在 DSH 家目录而不是插件包里，因为 DSH 安装插件时会把包复制进 profile 的 `node_modules`，重装或更新会覆盖包目录。自动生成的配置：
+   - 角色：一个 `main`（主角色），人设里对应 `{{mem_self_main}}`。要改名字或加角色，编辑这个文件后重启 DSH。
+   - 记忆库：系统「文档」目录下的 `DSH-Memory`（Linux 按 XDG 设置，如 `~/文档/DSH-Memory`）。不能放在 DSH 家目录里。
+   - 时区：取系统时区。模型、嵌入、预算等其余项与 `memory.config.example.json` 相同。
 4. 为启动 DSH 的环境提供 `GOOGLE_API_KEY`、`DEEPSEEK_API_KEY`，或在配置里修改 `apiKeyEnv` 指向已有变量。不要把密钥写进人设或 JSON。桌面应用必须能继承相应环境变量。
-5. 主入口保留明确的部署门控：`security.deploymentAcknowledged` 默认为 `false`，因此**默认不会启动 DSH 记忆服务**。该实现承诺模型不能越权管理记忆；要启用，需在宿主或 OS 部署层限制模型工具直接访问记忆库、角色配置和管理凭据，再将该值设为 `true`。这只是操作者声明，不是自动隔离功能。没有这些限制时，不应宣称角色私库已经隔离；可先使用独立管理模式。细节见 `docs/host-adapter.md`。
+5. 部署门控：自动生成的配置里 `security.deploymentAcknowledged` 为 `true`，按个人单机使用默认启动。这表示接受「DSH 的文件/命令工具在技术上能直接读写记忆库」，插件自身的工具仍只允许追加和提议。需要严格隔离的部署，把它改回 `false`，并按 `docs/host-adapter.md` 在宿主或 OS 层限制模型工具。
 6. 关闭目标 DSH 实例后，将本地包加入需要的 profile：
 
    ```powershell
@@ -50,7 +52,7 @@
    dsh plugin --profile desktop add 'C:\DSH-Plugins\dsh-memory-companion'
    ```
 
-   desktop profile 需已由桌面版初始化，装配时桌面版应完全退出。选择你实际使用的 profile，不必两条都执行。包的 `dsh.bundle.patch` 指向 `cordis.patch.yml`，两入口都读取包根的 `memory.config.json`；不需要额外安装第二个插件。移动包目录后，应按 DSH 的插件管理流程更新其来源。
+   desktop profile 需已由桌面版初始化，装配时桌面版应完全退出。选择你实际使用的 profile，不必两条都执行。包的 `dsh.bundle.patch` 指向 `cordis.patch.yml`，两入口读取同一份自动生成的配置；不需要额外安装第二个插件。移动包目录后，应按 DSH 的插件管理流程更新其来源。
 7. 在 DSH 原生人设的 **prefix** 中写入以下声明，然后由用户正常启动 DSH：
 
    ```text
@@ -71,7 +73,7 @@
 DSH 里的插件已运行时，在用户自己的终端执行：
 
 ```powershell
-node .\src\cli.mjs open --config .\memory.config.json
+node .\src\cli.mjs open
 ```
 
 命令输出当前管理链接，在用户浏览器打开即可。`open` 不会再打开记忆库或争抢库锁。DSH `/memory status` 只提供不含管理令牌的状态信息。
@@ -79,7 +81,7 @@ node .\src\cli.mjs open --config .\memory.config.json
 若不运行 DSH，可独立开启管理页：
 
 ```powershell
-node .\src\cli.mjs serve --config .\memory.config.json
+node .\src\cli.mjs serve
 ```
 
 同一个库只能由一个服务持有，**不要同时运行 DSH 插件和独立 serve**。`serve` 会按配置启动后台日记任务；只想人工管理时，先将 `diary.enabled` 设为 `false`。嵌入、补记、整理和回放可能使用配置的模型额度。
@@ -108,9 +110,9 @@ commit time: 2026-11-13T06:08:23Z
 管理页支持索引重建、导出、任务状态与审批。只有记忆服务退出后，才使用以下需独占库的 CLI：
 
 ```powershell
-node .\src\cli.mjs status --config .\memory.config.json
-node .\src\cli.mjs rebuild --config .\memory.config.json --role main
-node .\src\cli.mjs export --config .\memory.config.json --destination 'D:\Memory-Backups\export-001'
+node .\src\cli.mjs status
+node .\src\cli.mjs rebuild --role main
+node .\src\cli.mjs export --destination 'D:\Memory-Backups\export-001'
 node .\src\cli.mjs restore --source 'D:\Memory-Backups\export-001' --destination 'D:\Memory-Restored\copy-001'
 ```
 

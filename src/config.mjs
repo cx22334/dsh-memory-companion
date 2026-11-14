@@ -12,7 +12,8 @@ const bounded = (value, fallback, minimum, maximum) => {
 export function normalizeConfig(input = {}) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new MemoryError('INVALID_CONFIG', '配置必须是对象');
   const vaultPath = path.resolve(input.vaultPath || path.join(os.homedir(), 'Documents', 'DSH-Memory'));
-  if (within(path.join(os.homedir(), '.dsh'), vaultPath)) throw new MemoryError('VAULT_IN_DSH', '记忆库必须放在 .dsh 目录之外');
+  const dshHomes = [path.join(os.homedir(), '.dsh'), process.env.DSH_HOME].filter(Boolean).map(dir => path.resolve(dir));
+  if (dshHomes.some(dir => within(dir, vaultPath))) throw new MemoryError('VAULT_IN_DSH', '记忆库必须放在 DSH 家目录之外');
   const roles = (input.roles || []).map(role => {
     if (!role || typeof role !== 'object') throw new MemoryError('INVALID_ROLE', '角色配置无效');
     const roleId = safeSegment(role.id || role.role_id || '');
